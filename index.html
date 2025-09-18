@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Películas</title>
+    <style>
+        div{
+            border: 1px solid black;
+            box-sizing: border-box;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        body{
+            display: grid;
+            grid-template-columns: 20% 80%;
+            grid-template-rows: 30% 70%;
+            grid-template-areas:
+            "side-bar nav-bar"
+            "side-bar content";
+            height: 100vh;
+            margin: 0;
+        }
+
+        .side-bar{
+            grid-area: side-bar;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            gap: 20px;
+            background-color: black;
+            overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .nav-bar{
+            grid-area: nav-bar;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background-color: #343a40;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #peli{
+            width: 100px;
+            height: 100px;
+            object-fit: cover; 
+            border-radius: 50%; 
+        }
+
+        #nav-Resultado {
+            font-size: 14px;  
+            font-weight: normal;
+            color: #ccc;
+        }
+
+        .content img {
+            width: 150px;      
+            height: 220px;
+            object-fit: cover; 
+            border-radius: 5px;
+        }
+
+        input{
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button{
+            width: 50%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover{
+            background-color: #218838;
+        }
+
+        .content{
+            grid-area: content;
+            padding: 10px;
+            overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .movie-card{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .movie-card img{
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="side-bar"> 
+        <img id="peli" src="./image.png" alt="">
+        <input type="text" id="Titulo" placeholder="Enter title here">
+        <input type="text" id="Genero" placeholder="Enter genre here">
+        <input type="text" id="Año" placeholder="Enter year here">
+        <input type="text" id="Director" placeholder="Enter director here">
+        <input type="text" id="imagen" placeholder="Enter image URL here">
+        <button id="Agregar">Add Movie</button>
+    </div>
+
+    <div class="nav-bar">
+        🎬 Movie App
+        <div id="nav-Resultado">Última: Ninguna</div>
+    </div>
+
+    <div class="content">
+        <div id="Resultado"></div>
+    </div>
+
+    <script>
+        document.getElementById("Agregar").addEventListener("click", () => {
+            const pelicula = {
+                nombre: document.getElementById("Titulo").value,
+                genero: document.getElementById("Genero").value,
+                año: document.getElementById("Año").value,
+                director: document.getElementById("Director").value,
+                imagen: document.getElementById("imagen").value
+            };
+
+            fetch("https://68c20743f9928dbf33ed3492.mockapi.io/CX8/Prueba", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(pelicula)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Película Agregada");
+
+                const navResult = document.getElementById("nav-Resultado");
+                navResult.textContent = `Última: ${data.nombre}`;
+
+                const result = document.getElementById("Resultado");
+                result.innerHTML = ""; 
+
+                const imagenElement = document.createElement("img");
+                imagenElement.src = data.imagen;
+                imagenElement.style.width = "150px"; 
+                imagenElement.style.height = "220px";
+                imagenElement.style.objectFit = "cover";
+                imagenElement.style.borderRadius = "5px";
+
+                result.appendChild(imagenElement);
+
+                console.log("Película añadida:", data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>
+
