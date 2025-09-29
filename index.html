@@ -1,189 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Películas</title>
-    <style>
-        div{
-            border: 1px solid black;
-            box-sizing: border-box;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Manager</title>
+<style>
+        body {
+      background: linear-gradient(135deg, #d4f1f9, #f9f9f9);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      min-height: 100vh;
+    }
 
-        body{
-            display: grid;
-            grid-template-columns: 20% 80%;
-            grid-template-rows: 30% 70%;
-            grid-template-areas:
-            "side-bar nav-bar"
-            "side-bar content";
-            height: 100vh;
-            margin: 0;
-        }
+    header h1 {
+      font-size: 2.2rem;
+      color: #222;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
 
-        .side-bar{
-            grid-area: side-bar;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
-            gap: 20px;
-            background-color: black;
-            overflow-y: auto;
-            height: 100vh;
-            box-sizing: border-box;
-        }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin-bottom: 10px;
+    }
 
-        .nav-bar{
-            grid-area: nav-bar;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background-color: #343a40;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-        }
+    nav a {
+      text-decoration: none;
+      color: #0077b6;
+      font-weight: bold;
+      padding: 8px 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
 
-        #peli{
-            width: 100px;
-            height: 100px;
-            object-fit: cover; 
-            border-radius: 50%; 
-        }
+    nav a:hover {
+      background-color: #0077b6;
+      color: #fff;
+    }
 
-        #nav-Resultado {
-            font-size: 14px;  
-            font-weight: normal;
-            color: #ccc;
-        }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 25px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
-        .content img {
-            width: 150px;      
-            height: 220px;
-            object-fit: cover; 
-            border-radius: 5px;
-        }
+    input, button {
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
 
-        input{
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+    input:focus {
+      outline: none;
+      border-color: #0077b6;
+      box-shadow: 0 0 6px rgba(0,119,182,0.3);
+    }
 
-        button{
-            width: 50%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #28a745;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
+    button {
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
 
-        button:hover{
-            background-color: #218838;
-        }
+    button:hover {
+      background-color: #005f8d;
+      transform: scale(1.05);
+    }
 
-        .content{
-            grid-area: content;
-            padding: 10px;
-            overflow-y: auto;
-            height: 100vh;
-            box-sizing: border-box;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-        }
+    .recipe-card {
+      width: 280px;
+      background-color: #fff;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      margin: 10px;
+      border: none;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-        .movie-card{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .movie-card img{
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-    </style>
+    .recipe-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+
+    .recipe-card img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      color: #333;
+      font-size: 1.2rem;
+      margin: 8px 0;
+      font-weight: bold;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.5;
+      font-size: 14px;
+      margin: 6px 0;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #0077b6;
+    }
+
+    .chef, .time {
+      font-size: 14px;
+      color: #666;
+    }
+
+    span {
+      color: #0077b6;
+      font-style: italic;
+      background-color: #eef7fb;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    span:hover {
+      background-color: #0077b6;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #Lista {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+    }
+
+    .delete-btn {
+      background-color: #e63946;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      background-color: #b31e2d;
+    }
+    
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+</style>
+
+    
 </head>
 <body>
-    <div class="side-bar"> 
-        <img id="peli" src="./image.png" alt="">
-        <input type="text" id="Titulo" placeholder="Enter title here">
-        <input type="text" id="Genero" placeholder="Enter genre here">
-        <input type="text" id="Año" placeholder="Enter year here">
+  <header>
+    <h1>Movie Manager</h1>
+    <nav>
+      <a href="agregar.html">Add movie</a>
+      <a href="buscar.html">Search movie</a>
+      <a href="eliminar.html">Delete movie</a>
+    </nav>
+  </header>
+
+  <main>
+    <form id="recipeForm">
+      <label for="Name" class="sr-only">Movie Name</label>
+      <input type="text" id="Name" placeholder="Enter name here">
+
+      <label for="Year" class="sr-only">Year of Release</label>
+      <input type="text" id="Year" placeholder="Enter year here">
+
+            <label for="Genre" class="sr-only">Director</label>
+
         <input type="text" id="Director" placeholder="Enter director here">
-        <input type="text" id="imagen" placeholder="Enter image URL here">
-        <button id="Agregar">Add Movie</button>
-    </div>
 
-    <div class="nav-bar">
-        🎬 Movie App
-        <div id="nav-Resultado">Última: Ninguna</div>
-    </div>
+            <label for="Genre" class="sr-only">Genre</label>
+        <input type="text" id="Genre" placeholder="Enter genre here">
 
-    <div class="content">
-        <div id="Resultado"></div>
-    </div>
+            <label for="Image" class="sr-only">Image URL</label>
+        <input type="text" id="Image" placeholder="Enter image URL here">
+
+      <button type="button" id="Agregar">Add Movie</button>
+    </form>
+
+    <section id="Lista"></section>
+  </main>
+
+
 
     <script>
-        document.getElementById("Agregar").addEventListener("click", () => {
-            const pelicula = {
-                nombre: document.getElementById("Titulo").value,
-                genero: document.getElementById("Genero").value,
-                año: document.getElementById("Año").value,
-                director: document.getElementById("Director").value,
-                imagen: document.getElementById("imagen").value
-            };
+    const URL = "https://68c20743f9928dbf33ed3492.mockapi.io/CX8/Prueba";
 
-            fetch("https://68c20743f9928dbf33ed3492.mockapi.io/CX8/Prueba", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(pelicula)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert("Película Agregada");
+    document.addEventListener("DOMContentLoaded", getData);
 
-                const navResult = document.getElementById("nav-Resultado");
-                navResult.textContent = `Última: ${data.nombre}`;
+    document.getElementById("Agregar").addEventListener("click", addRecipe);
 
-                const result = document.getElementById("Resultado");
-                result.innerHTML = ""; 
+async function addMovie() {
+    const movie = {
+        title: document.getElementById("Titulo").value.trim(),
+        genre: document.getElementById("Genero").value.trim(),
+        year: document.getElementById("Año").value.trim(),
+        director: document.getElementById("Director").value.trim(),
+        image: document.getElementById("imagen").value.trim()
+    };
 
-                const imagenElement = document.createElement("img");
-                imagenElement.src = data.imagen;
-                imagenElement.style.width = "150px"; 
-                imagenElement.style.height = "220px";
-                imagenElement.style.objectFit = "cover";
-                imagenElement.style.borderRadius = "5px";
+    // Validación
+    if (!movie.title || !movie.genre || !movie.year || !movie.director || !movie.image) {
+        alert("Por favor completa todos los campos.");
+        return;
+    }
 
-                result.appendChild(imagenElement);
-
-                console.log("Película añadida:", data);
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
+    try {
+        const response = await fetch(apiURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(movie)
         });
+
+        if (!response.ok) throw new Error("Error al agregar película");
+
+        alert("✅ Película agregada con éxito");
+        clearForm();
+        getData();
+    } catch (error) {
+        console.error("Error:", error);
+        alert("❌ No se pudo agregar la película");
+    }
+}
+
+async function getData() {
+    try {
+        const response = await fetch(apiURL);
+        if (!response.ok) throw new Error("Error al obtener películas");
+
+        const data = await response.json();
+        renderData(data);
+        console.log("Películas cargadas:", data);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+function renderData(data) {
+    const result = document.getElementById("Lista");
+    result.innerHTML = "";
+
+    data.forEach(movie => {
+        const card = document.createElement("div");
+        card.classList.add("recipe-card");
+
+        card.innerHTML = `
+            <h2 class="name">${movie.title}</h2>
+            <p class="chef">Chef: ${receta.chef}</p>
+            <p class="time">Time: ${receta.tiempo}</p>
+            <img src="${receta.imagen}" alt="Imagen de ${receta.nombre}">
+            <button onclick="deleteData(${receta.id})" class="delete-btn">Eliminar</button>
+        `;
+
+        result.appendChild(card);
+    });
+}
+
+function deleteData(movieId) {
+    fetch(`${apiURL}/${movieId}`,{ method: "DELETE"})
+    .then(response => {
+        if (!response.ok) throw new Error("Error al eliminar receta");
+            alert("✅ Receta eliminada con éxito");
+            getData();
+            console.log("Película eliminada:", movieId);
+    })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("❌ No se pudo eliminar la película");
+        });
+}
+
+function clearForm() {
+    document.getElementById("Titulo").value = "";
+    document.getElementById("Genero").value = "";
+    document.getElementById("Año").value = "";
+    document.getElementById("Director").value = "";
+    document.getElementById("imagen").value = "";
+}
+
     </script>
 </body>
 </html>
