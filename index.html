@@ -84,7 +84,7 @@
       transform: scale(1.05);
     }
 
-    .recipe-card {
+    .movie-card {
       width: 280px;
       background-color: #fff;
       padding: 18px;
@@ -100,12 +100,12 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .recipe-card:hover {
+    .movie-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 6px 18px rgba(0,0,0,0.18);
     }
 
-    .recipe-card img {
+    .movie-card img {
       width: 100%;
       max-height: 180px;
       object-fit: cover;
@@ -113,14 +113,14 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     }
 
-    h2 {
+    .movie-card h2 {
       color: #333;
       font-size: 1.2rem;
       margin: 8px 0;
       font-weight: bold;
     }
 
-    p {
+    .movie-card p {
       color: #555;
       line-height: 1.5;
       font-size: 14px;
@@ -160,19 +160,52 @@
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
+
+    .search-container {
+      margin-bottom: 20px;
+    }
+
+    .search-container input {
+      width: 300px;
+    }
+
+    .error {
+      color: #e63946;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .placeholder-img {
+      width: 100%;
+      height: 180px;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      color: #777;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Movie Manager</h1>
     <nav>
-      <a href="agregar.html">Add movie</a>
-      <a href="buscar.html">Search movie</a>
-      <a href="eliminar.html">Delete movie</a>
+      <a href="#" id="nav-add">Add movie</a>
+      <a href="#" id="nav-search">Search movie</a>
+      <a href="#" id="nav-delete">Delete movie</a>
     </nav>
   </header>
 
   <main>
+    <div class="search-container" id="searchContainer" style="display: none;">
+      <label for="searchInput" class="sr-only">Search Movies</label>
+      <input type="text" id="searchInput" placeholder="Search by title, director or genre">
+      <button id="searchBtn">Search</button>
+      <button id="clearSearch">Clear</button>
+    </div>
+
     <form id="movieForm">
       <label for="Title" class="sr-only">Movie Name</label>
       <input type="text" id="Title" placeholder="Enter name here">
@@ -197,9 +230,15 @@
 
   <script>
     const apiURL = "https://68c20743f9928dbf33ed3492.mockapi.io/CX8/Prueba";
+    let allMovies = [];
 
     document.addEventListener("DOMContentLoaded", getData);
     document.getElementById("Agregar").addEventListener("click", addMovie);
+    document.getElementById("nav-add").addEventListener("click", showAddForm);
+    document.getElementById("nav-search").addEventListener("click", showSearch);
+    document.getElementById("nav-delete").addEventListener("click", showDeleteMode);
+    document.getElementById("searchBtn").addEventListener("click", searchMovies);
+    document.getElementById("clearSearch").addEventListener("click", clearSearch);
 
     async function addMovie() {
       const movie = {
@@ -210,10 +249,38 @@
         image: document.getElementById("Image").value.trim()
       };
 
-      if (!movie.title || !movie.year || !movie.director || !movie.genre || !movie.image) {
-        alert("⚠️ Por favor completa todos los campos.");
-        return;
+      // Clear previous errors
+      clearErrors();
+
+      // Validation
+      let isValid = true;
+      
+      if (!movie.title) {
+        showError("Title", "Movie title is required");
+        isValid = false;
       }
+      
+      if (!movie.year || !/^\d{4}$/.test(movie.year)) {
+        showError("Year", "Please enter a valid year (4 digits)");
+        isValid = false;
+      }
+      
+      if (!movie.director) {
+        showError("Director", "Director name is required");
+        isValid = false;
+      }
+      
+      if (!movie.genre) {
+        showError("Genre", "Genre is required");
+        isValid = false;
+      }
+      
+      if (!movie.image) {
+        showError("Image", "Image URL is required");
+        isValid = false;
+      }
+
+      if (!isValid) return;
 
       try {
         const response = await fetch(apiURL, {
@@ -224,12 +291,12 @@
 
         if (!response.ok) throw new Error("Error al agregar película");
 
-        alert("✅ Película agregada con éxito");
+        alert("✅ Movie added successfully");
         clearForm();
         getData();
       } catch (error) {
         console.error("Error:", error);
-        alert("❌ No se pudo agregar la película");
+        alert("❌ Failed to add movie");
       }
     }
 
@@ -239,6 +306,7 @@
         if (!response.ok) throw new Error("Error al obtener películas");
 
         const data = await response.json();
+        allMovies = data;
         renderData(data);
       } catch (error) {
         console.error("Error:", error);
@@ -249,17 +317,26 @@
       const result = document.getElementById("Lista");
       result.innerHTML = "";
 
+      if (data.length === 0) {
+        result.innerHTML = "<p>No movies found</p>";
+        return;
+      }
+
       data.forEach(movie => {
         const card = document.createElement("div");
-        card.classList.add("recipe-card");
+        card.classList.add("movie-card");
 
         card.innerHTML = `
-          <h2 class="name">${movie.title}</h2>
+          <h2>${movie.title}</h2>
           <p><strong>Year:</strong> ${movie.year}</p>
           <p><strong>Director:</strong> ${movie.director}</p>
           <p><strong>Genre:</strong> ${movie.genre}</p>
-          <img src="${movie.image}" alt="Poster of ${movie.title}">
-          <button onclick="deleteData(${movie.id})" class="delete-btn">Eliminar</button>
+          ${movie.image ? 
+            `<img src="${movie.image}" alt="Poster of ${movie.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
+            ""
+          }
+          <div class="placeholder-img" style="${movie.image ? 'display:none' : 'display:flex'}">No Image Available</div>
+          <button onclick="deleteData('${movie.id}')" class="delete-btn">Delete</button>
         `;
 
         result.appendChild(card);
@@ -267,15 +344,19 @@
     }
 
     async function deleteData(movieId) {
+      if (!confirm("Are you sure you want to delete this movie?")) {
+        return;
+      }
+
       try {
         const response = await fetch(`${apiURL}/${movieId}`, { method: "DELETE" });
         if (!response.ok) throw new Error("Error al eliminar película");
 
-        alert("✅ Película eliminada con éxito");
+        alert("✅ Movie deleted successfully");
         getData();
       } catch (error) {
         console.error("Error:", error);
-        alert("❌ No se pudo eliminar la película");
+        alert("❌ Failed to delete movie");
       }
     }
 
@@ -285,9 +366,66 @@
       document.getElementById("Director").value = "";
       document.getElementById("Genre").value = "";
       document.getElementById("Image").value = "";
+      clearErrors();
+    }
+
+    function showError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      let errorElement = field.nextElementSibling;
+      
+      if (!errorElement || !errorElement.classList.contains("error")) {
+        errorElement = document.createElement("div");
+        errorElement.classList.add("error");
+        field.parentNode.insertBefore(errorElement, field.nextSibling);
+      }
+      
+      errorElement.textContent = message;
+    }
+
+    function clearErrors() {
+      const errors = document.querySelectorAll(".error");
+      errors.forEach(error => error.remove());
+    }
+
+    function showAddForm() {
+      document.getElementById("movieForm").style.display = "flex";
+      document.getElementById("searchContainer").style.display = "none";
+      getData();
+    }
+
+    function showSearch() {
+      document.getElementById("movieForm").style.display = "none";
+      document.getElementById("searchContainer").style.display = "block";
+      getData();
+    }
+
+    function showDeleteMode() {
+      document.getElementById("movieForm").style.display = "none";
+      document.getElementById("searchContainer").style.display = "none";
+      getData();
+    }
+
+    function searchMovies() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase().trim();
+      
+      if (!searchTerm) {
+        renderData(allMovies);
+        return;
+      }
+      
+      const filteredMovies = allMovies.filter(movie => 
+        movie.title.toLowerCase().includes(searchTerm) ||
+        movie.director.toLowerCase().includes(searchTerm) ||
+        movie.genre.toLowerCase().includes(searchTerm)
+      );
+      
+      renderData(filteredMovies);
+    }
+
+    function clearSearch() {
+      document.getElementById("searchInput").value = "";
+      renderData(allMovies);
     }
   </script>
 </body>
 </html>
-
-
