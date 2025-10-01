@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recipe Manager</title>
-<style>
-        body {
+  <title>Movie Manager</title>
+  <style>
+    body {
       background: linear-gradient(135deg, #d4f1f9, #f9f9f9);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
@@ -127,39 +127,6 @@
       margin: 6px 0;
     }
 
-    .name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #0077b6;
-    }
-
-    .chef, .time {
-      font-size: 14px;
-      color: #666;
-    }
-
-    span {
-      color: #0077b6;
-      font-style: italic;
-      background-color: #eef7fb;
-      padding: 5px 10px;
-      border-radius: 6px;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    span:hover {
-      background-color: #0077b6;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    #Lista {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 25px;
-    }
-
     .delete-btn {
       background-color: #e63946;
       color: white;
@@ -175,7 +142,14 @@
     .delete-btn:hover {
       background-color: #b31e2d;
     }
-    
+
+    #Lista {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+    }
+
     .sr-only {
       position: absolute;
       width: 1px;
@@ -186,9 +160,7 @@
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
-</style>
-
-    
+  </style>
 </head>
 <body>
   <header>
@@ -201,22 +173,21 @@
   </header>
 
   <main>
-    <form id="recipeForm">
-      <label for="Name" class="sr-only">Movie Name</label>
-      <input type="text" id="Name" placeholder="Enter name here">
+    <form id="movieForm">
+      <label for="Title" class="sr-only">Movie Name</label>
+      <input type="text" id="Title" placeholder="Enter name here">
 
       <label for="Year" class="sr-only">Year of Release</label>
       <input type="text" id="Year" placeholder="Enter year here">
 
-            <label for="Genre" class="sr-only">Director</label>
+      <label for="Director" class="sr-only">Director</label>
+      <input type="text" id="Director" placeholder="Enter director here">
 
-        <input type="text" id="Director" placeholder="Enter director here">
+      <label for="Genre" class="sr-only">Genre</label>
+      <input type="text" id="Genre" placeholder="Enter genre here">
 
-            <label for="Genre" class="sr-only">Genre</label>
-        <input type="text" id="Genre" placeholder="Enter genre here">
-
-            <label for="Image" class="sr-only">Image URL</label>
-        <input type="text" id="Image" placeholder="Enter image URL here">
+      <label for="Image" class="sr-only">Image URL</label>
+      <input type="text" id="Image" placeholder="Enter image URL here">
 
       <button type="button" id="Agregar">Add Movie</button>
     </form>
@@ -224,35 +195,31 @@
     <section id="Lista"></section>
   </main>
 
-
-
-    <script>
-    const URL = "https://68c20743f9928dbf33ed3492.mockapi.io/CX8/Prueba";
+  <script>
+    const apiURL = "https://68c20743f9928dbf33ed3492.mockapi.io/CX8/Prueba";
 
     document.addEventListener("DOMContentLoaded", getData);
+    document.getElementById("Agregar").addEventListener("click", addMovie);
 
-    document.getElementById("Agregar").addEventListener("click", addRecipe);
-
-async function addMovie() {
-    const movie = {
-        title: document.getElementById("Titulo").value.trim(),
-        genre: document.getElementById("Genero").value.trim(),
-        year: document.getElementById("Año").value.trim(),
+    async function addMovie() {
+      const movie = {
+        title: document.getElementById("Title").value.trim(),
+        year: document.getElementById("Year").value.trim(),
         director: document.getElementById("Director").value.trim(),
-        image: document.getElementById("imagen").value.trim()
-    };
+        genre: document.getElementById("Genre").value.trim(),
+        image: document.getElementById("Image").value.trim()
+      };
 
-    // Validación
-    if (!movie.title || !movie.genre || !movie.year || !movie.director || !movie.image) {
-        alert("Por favor completa todos los campos.");
+      if (!movie.title || !movie.year || !movie.director || !movie.genre || !movie.image) {
+        alert("⚠️ Por favor completa todos los campos.");
         return;
-    }
+      }
 
-    try {
+      try {
         const response = await fetch(apiURL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(movie)
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(movie)
         });
 
         if (!response.ok) throw new Error("Error al agregar película");
@@ -260,68 +227,67 @@ async function addMovie() {
         alert("✅ Película agregada con éxito");
         clearForm();
         getData();
-    } catch (error) {
+      } catch (error) {
         console.error("Error:", error);
         alert("❌ No se pudo agregar la película");
+      }
     }
-}
 
-async function getData() {
-    try {
+    async function getData() {
+      try {
         const response = await fetch(apiURL);
         if (!response.ok) throw new Error("Error al obtener películas");
 
         const data = await response.json();
         renderData(data);
-        console.log("Películas cargadas:", data);
-    } catch (error) {
+      } catch (error) {
         console.error("Error:", error);
+      }
     }
-}
 
-function renderData(data) {
-    const result = document.getElementById("Lista");
-    result.innerHTML = "";
+    function renderData(data) {
+      const result = document.getElementById("Lista");
+      result.innerHTML = "";
 
-    data.forEach(movie => {
+      data.forEach(movie => {
         const card = document.createElement("div");
         card.classList.add("recipe-card");
 
         card.innerHTML = `
-            <h2 class="name">${movie.title}</h2>
-            <p class="chef">Chef: ${receta.chef}</p>
-            <p class="time">Time: ${receta.tiempo}</p>
-            <img src="${receta.imagen}" alt="Imagen de ${receta.nombre}">
-            <button onclick="deleteData(${receta.id})" class="delete-btn">Eliminar</button>
+          <h2 class="name">${movie.title}</h2>
+          <p><strong>Year:</strong> ${movie.year}</p>
+          <p><strong>Director:</strong> ${movie.director}</p>
+          <p><strong>Genre:</strong> ${movie.genre}</p>
+          <img src="${movie.image}" alt="Poster of ${movie.title}">
+          <button onclick="deleteData(${movie.id})" class="delete-btn">Eliminar</button>
         `;
 
         result.appendChild(card);
-    });
-}
+      });
+    }
 
-function deleteData(movieId) {
-    fetch(`${apiURL}/${movieId}`,{ method: "DELETE"})
-    .then(response => {
-        if (!response.ok) throw new Error("Error al eliminar receta");
-            alert("✅ Receta eliminada con éxito");
-            getData();
-            console.log("Película eliminada:", movieId);
-    })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("❌ No se pudo eliminar la película");
-        });
-}
+    async function deleteData(movieId) {
+      try {
+        const response = await fetch(`${apiURL}/${movieId}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Error al eliminar película");
 
-function clearForm() {
-    document.getElementById("Titulo").value = "";
-    document.getElementById("Genero").value = "";
-    document.getElementById("Año").value = "";
-    document.getElementById("Director").value = "";
-    document.getElementById("imagen").value = "";
-}
+        alert("✅ Película eliminada con éxito");
+        getData();
+      } catch (error) {
+        console.error("Error:", error);
+        alert("❌ No se pudo eliminar la película");
+      }
+    }
 
-    </script>
+    function clearForm() {
+      document.getElementById("Title").value = "";
+      document.getElementById("Year").value = "";
+      document.getElementById("Director").value = "";
+      document.getElementById("Genre").value = "";
+      document.getElementById("Image").value = "";
+    }
+  </script>
 </body>
 </html>
+
 
